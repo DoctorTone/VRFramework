@@ -144,8 +144,7 @@ class Moon {
     this.createScene();
     this.createGUI();
     this.loadModels();
-
-    // this.setupVR();
+    this.setupVR();
 
     this.stats = new Stats();
     this.container.appendChild(this.stats.dom);
@@ -155,6 +154,7 @@ class Moon {
 
   createRenderer = () => {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setClearColor(new THREE.Color(0x777777));
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -171,8 +171,8 @@ class Moon {
     controller.addEventListener("connected", function (event) {
       this.add(buildController(event.data));
     });
-    // controller.addEventListener("selectstart", this.onSelectStart);
-    // controller.addEventListener("selectend", this.onSelectEnd);
+    controller.addEventListener("selectstart", this.onSelectStart);
+    controller.addEventListener("selectend", this.onSelectEnd);
 
     this.controllers.push(controller);
     this.scene.add(controller);
@@ -208,7 +208,7 @@ class Moon {
       0.01,
       2000
     );
-    this.camera.position.set(0, 3, 20);
+    this.camera.position.set(0, 3, 30);
   };
 
   createLights = () => {
