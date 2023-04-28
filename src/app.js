@@ -31,9 +31,9 @@ const LUNAR_SCALE = (Math.PI * 2) / 29.5;
 
 const MOON_SCALE = 1;
 const BLOOM_SCENE = 1;
-const SPRITE_OFFSET = 0.2;
-const WATER_GEOM_WIDTH = 2000;
-const WATER_GEOM_HEIGHT = 2000;
+const SPHERE_RADIUS = 10;
+const FLOOR_WIDTH = 100;
+const FLOOR_DEPTH = 100;
 const WIDTH_SEGMENTS = 32;
 const HEIGHT_SEGMENTS = 32;
 
@@ -285,10 +285,16 @@ class Moon {
   createScene = () => {
     this.scene = new THREE.Scene();
     this.scene.add(this.ambientLight);
-    const sphereGeom = new THREE.SphereGeometry(10);
+    const sphereGeom = new THREE.SphereGeometry(SPHERE_RADIUS);
     const sphereMat = new THREE.MeshStandardMaterial({ color: "hotpink" });
     const sphere = new THREE.Mesh(sphereGeom, sphereMat);
+    sphere.position.y += SPHERE_RADIUS;
+    const floorGeom = new THREE.PlaneGeometry(FLOOR_WIDTH, FLOOR_DEPTH);
+    const floorMat = new THREE.MeshStandardMaterial({ color: "lightblue" });
+    const floor = new THREE.Mesh(floorGeom, floorMat);
+    floor.rotation.x = -Math.PI / 2;
     this.scene.add(sphere);
+    this.scene.add(floor);
     this.scene.add(this.pointerControls.getObject());
   };
 
