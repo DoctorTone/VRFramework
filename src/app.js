@@ -8,6 +8,7 @@ import { GUI } from "lil-gui";
 import { PointerLockControls } from "./controls/PointerLockControls";
 import { DRACOLoader } from "./loaders/DRACOLoader.js";
 import { GLTFLoader } from "./loaders/GLTFLoader.js";
+import { SCENE } from "./config/Config.js";
 
 // WebXR
 import { VRButton } from "./webXR/VRButton.js";
@@ -205,9 +206,9 @@ class Moon {
       45,
       window.innerWidth / window.innerHeight,
       0.01,
-      2000
+      1000
     );
-    this.camera.position.set(0, 3, 30);
+    this.camera.position.copy(SCENE.cameraPosition);
   };
 
   createLights = () => {
@@ -222,11 +223,6 @@ class Moon {
   };
 
   createControls = () => {
-    // this.orbitControls = new OrbitControls(
-    //   this.camera,
-    //   this.renderer.domElement
-    // );
-    // this.orbitControls.target.set(0, 0, 0);
     this.pointerControls = new PointerLockControls(
       this.camera,
       this.renderer.domElement
@@ -300,7 +296,7 @@ class Moon {
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.1;
-    this.scene.add(sphere);
+    // this.scene.add(sphere);
     this.scene.add(floor);
     this.scene.add(this.pointerControls.getObject());
     // Grid
@@ -437,61 +433,12 @@ class Moon {
   };
 
   loadModels = () => {
-    return;
-
-    this.GLTFLoader.load("./models/gltf/moonScene.glb", (gltf) => {
-      this.moon = gltf.scene;
-      this.moon.traverse((node) => {
-        if (node.isLight) {
-          this.modelLights.push(node);
-          node.visible = false;
-        }
-        if (node.isMesh) {
-          node.layers.enable(BLOOM_SCENE);
-        }
-      });
-      // Set defaults
-      this.moon.scale.set(DEFAULT_SCALE, DEFAULT_SCALE, DEFAULT_SCALE);
-      this.moon.position.set(
-        DEFAULT_POSITION.x,
-        DEFAULT_POSITION.y,
-        DEFAULT_POSITION.z
-      );
-      this.moon.rotation.set(
-        DEFAULT_ROTATION.x,
-        DEFAULT_ROTATION.y,
-        DEFAULT_ROTATION.z
-      );
-
-      this.moon.add(this.moonSprite);
-      // Update GUI
-      this.moonScaleX.setValue(this.moon.scale.x);
-      this.moonScaleY.setValue(this.moon.scale.y);
-      this.moonScaleZ.setValue(this.moon.scale.z);
-      this.moonPosX.setValue(this.moon.position.x);
-      this.moonPosY.setValue(this.moon.position.y);
-      this.moonPosZ.setValue(this.moon.position.z);
-
-      this.scene.add(this.moon);
-      this.scene.add(this.transformControls);
-      this.scene.add(this.bloomControls);
-
-      this.transformControls.addEventListener("change", this.render);
-      this.transformControls.addEventListener("dragging-changed", (event) => {
-        this.orbitControls.enabled = !event.value;
-        this.moonPosX.setValue(this.moon.position.x);
-        this.moonPosY.setValue(this.moon.position.y);
-        this.moonPosZ.setValue(this.moon.position.z);
-        this.moonRotX.setValue(radsToDegrees(this.moon.rotation.x));
-        this.moonRotY.setValue(radsToDegrees(this.moon.rotation.y));
-        this.moonRotZ.setValue(radsToDegrees(this.moon.rotation.z));
-        this.moonScaleX.setValue(this.moon.scale.x);
-        this.moonScaleY.setValue(this.moon.scale.y);
-        this.moonScaleZ.setValue(this.moon.scale.z);
-        // DEBUG
-        console.log("Rotation = ", this.moon.rotation);
-      });
-      this.loadSettings();
+    this.GLTFLoader.load("models/gltf/lucy.gltf", (gltf) => {
+      const scale = 15;
+      const model = gltf.scene;
+      model.scale.set(scale, scale, scale);
+      model.position.y = 10;
+      this.scene.add(model);
     });
   };
 
