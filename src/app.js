@@ -54,6 +54,13 @@ class Moon {
   controllerGrips = [];
   finalPass;
   textureLoader;
+  // Movement
+  moveForward = false;
+  moveBackward = false;
+  moveLeft = false;
+  moveRight = false;
+  velocity = new THREE.Vector3();
+  direction = new THREE.Vector3();
   settingsName = "moonSettings";
   generalSettings = {
     "Save Settings": () => {
@@ -127,6 +134,7 @@ class Moon {
     this.darkMaterial = new THREE.MeshBasicMaterial({ color: "black" });
     this.materials = {};
     this.textureLoader = new THREE.TextureLoader();
+    this.clock = new THREE.Clock();
 
     this.createRenderer();
     this.createCamera();
@@ -222,6 +230,56 @@ class Moon {
     this.renderer.domElement.addEventListener("click", () => {
       this.pointerControls.lock();
     });
+    document.addEventListener("keydown", this.onKeyDown);
+    document.addEventListener("keyup", this.onKeyUp);
+  };
+
+  onKeyDown = (event) => {
+    switch (event.code) {
+      case "ArrowUp":
+      case "KeyW":
+        this.moveForward = true;
+        break;
+
+      case "ArrowLeft":
+      case "KeyA":
+        this.moveLeft = true;
+        break;
+
+      case "ArrowDown":
+      case "KeyS":
+        this.moveBackward = true;
+        break;
+
+      case "ArrowRight":
+      case "KeyD":
+        this.moveRight = true;
+        break;
+    }
+  };
+
+  onKeyUp = (event) => {
+    switch (event.code) {
+      case "ArrowUp":
+      case "KeyW":
+        this.moveForward = false;
+        break;
+
+      case "ArrowLeft":
+      case "KeyA":
+        this.moveLeft = false;
+        break;
+
+      case "ArrowDown":
+      case "KeyS":
+        this.moveBackward = false;
+        break;
+
+      case "ArrowRight":
+      case "KeyD":
+        this.moveRight = false;
+        break;
+    }
   };
 
   createScene = () => {
@@ -431,6 +489,29 @@ class Moon {
   };
 
   render = () => {
+    // Movement
+    const delta = this.clock.getDelta();
+    if (this.pointerControls.isLocked) {
+      this.velocity.x -= this.velocity.x * 10.0 * delta;
+      this.velocity.z -= this.velocity.z * 10.0 * delta;
+
+      // this.velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+
+      this.direction.z = Number(this.moveForward) - Number(this.moveBackward);
+      this.direction.x = Number(this.moveRight) - Number(this.moveLeft);
+      this.direction.normalize(); // this ensures consistent movements in all directions
+
+      if (this.moveForward || this.moveBackward)
+        this.velocity.z -= this.direction.z * 400.0 * delta;
+      if (this.moveLeft || this.moveRight)
+        this.velocity.x -= this.direction.x * 400.0 * delta;
+
+      this.pointerControls.moveRight(-this.velocity.x * delta);
+      this.pointerControls.moveForward(-this.velocity.z * delta);
+
+      // this.pointerControls.getObject().position.y += this.velocity.y * delta; // new behavior
+    }
+
     this.renderer.render(this.scene, this.camera);
 
     this.stats.update();
