@@ -34,9 +34,9 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "ArtXR Test Viewer",
+      title: "VR Test Viewer",
       filename: "index.html",
-      template: path.resolve(__dirname, "./src/moon.html"),
+      template: path.resolve(__dirname, "./src/VRTest.html"),
     }),
   ],
 };

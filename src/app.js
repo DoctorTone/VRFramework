@@ -215,6 +215,8 @@ class Moon {
     const color = 0xffffff;
     const intensity = 1.0;
     this.ambientLight = new THREE.AmbientLight(color, intensity);
+    this.pointLight = new THREE.PointLight(color, 1);
+    this.pointLight.position.set(30, 30, 30);
   };
 
   createControls = () => {
@@ -285,6 +287,7 @@ class Moon {
   createScene = () => {
     this.scene = new THREE.Scene();
     this.scene.add(this.ambientLight);
+    this.scene.add(this.pointLight);
     const sphereGeom = new THREE.SphereGeometry(SPHERE_RADIUS);
     const sphereMat = new THREE.MeshStandardMaterial({ color: "hotpink" });
     const sphere = new THREE.Mesh(sphereGeom, sphereMat);
