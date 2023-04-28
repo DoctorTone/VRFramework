@@ -5,8 +5,7 @@ import * as THREE from "three";
 
 import Stats from "./libs/stats.module.js";
 import { GUI } from "lil-gui";
-import { OrbitControls } from "./controls/OrbitControls.js";
-import { TransformControls } from "./controls/TransformControls.js";
+import { PointerLockControls } from "./controls/PointerLockControls";
 import { DRACOLoader } from "./loaders/DRACOLoader.js";
 import { GLTFLoader } from "./loaders/GLTFLoader.js";
 
@@ -45,23 +44,15 @@ class Moon {
   scene;
   stats;
   ambientLight;
-  waterGeometry;
-  waterShader;
   dracoLoader;
   GLTFLoader;
   orbitControls;
-  transformControls;
-  bloomControls;
   modelLights = [];
-  bloomEnabled = false;
-  bloomLayer;
-  bloomPass;
   renderScene;
   // Controllers
   controllers = [];
   controllerGrips = [];
   finalPass;
-  waterTime = 1 / 60;
   textureLoader;
   settingsName = "moonSettings";
   generalSettings = {
@@ -219,22 +210,18 @@ class Moon {
   };
 
   createControls = () => {
-    this.orbitControls = new OrbitControls(
+    // this.orbitControls = new OrbitControls(
+    //   this.camera,
+    //   this.renderer.domElement
+    // );
+    // this.orbitControls.target.set(0, 0, 0);
+    this.pointerControls = new PointerLockControls(
       this.camera,
       this.renderer.domElement
     );
-    this.orbitControls.target.set(0, 0, 0);
-
-    this.transformControls = new TransformControls(
-      this.camera,
-      this.renderer.domElement
-    );
-
-    this.bloomControls = new TransformControls(
-      this.camera,
-      this.renderer.domElement
-    );
-    this.bloomControls.setMode("scale");
+    this.renderer.domElement.addEventListener("click", () => {
+      this.pointerControls.lock();
+    });
   };
 
   createScene = () => {
@@ -244,6 +231,7 @@ class Moon {
     const sphereMat = new THREE.MeshStandardMaterial({ color: "hotpink" });
     const sphere = new THREE.Mesh(sphereGeom, sphereMat);
     this.scene.add(sphere);
+    this.scene.add(this.pointerControls.getObject());
   };
 
   createGUI = () => {
