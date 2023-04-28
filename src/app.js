@@ -299,9 +299,15 @@ class Moon {
     const floorMat = new THREE.MeshLambertMaterial({ color: 0x2746cf });
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.1;
     this.scene.add(sphere);
     this.scene.add(floor);
     this.scene.add(this.pointerControls.getObject());
+    // Grid
+    const grid = new THREE.GridHelper(1000, 100, 0x000000, 0x000000);
+    grid.material.opacity = 0.5;
+    grid.material.transparent = true;
+    this.scene.add(grid);
   };
 
   createGUI = () => {
