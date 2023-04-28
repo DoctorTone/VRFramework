@@ -32,8 +32,8 @@ const LUNAR_SCALE = (Math.PI * 2) / 29.5;
 const MOON_SCALE = 1;
 const BLOOM_SCENE = 1;
 const SPHERE_RADIUS = 10;
-const FLOOR_WIDTH = 100;
-const FLOOR_DEPTH = 100;
+const FLOOR_WIDTH = 1000;
+const FLOOR_DEPTH = 1000;
 const WIDTH_SEGMENTS = 32;
 const HEIGHT_SEGMENTS = 32;
 
@@ -202,7 +202,7 @@ class Moon {
 
   createCamera = () => {
     this.camera = new THREE.PerspectiveCamera(
-      55,
+      45,
       window.innerWidth / window.innerHeight,
       0.01,
       2000
@@ -216,7 +216,9 @@ class Moon {
     const intensity = 1.0;
     this.ambientLight = new THREE.AmbientLight(color, intensity);
     this.pointLight = new THREE.PointLight(color, 1);
-    this.pointLight.position.set(30, 30, 30);
+    this.pointLight.position.set(30, 30, 0);
+    // this.dirLight = new THREE.DirectionalLight(color, 1);
+    // this.dirLight.position.set(1, 1, 0);
   };
 
   createControls = () => {
@@ -288,12 +290,13 @@ class Moon {
     this.scene = new THREE.Scene();
     this.scene.add(this.ambientLight);
     this.scene.add(this.pointLight);
+    // this.scene.add(this.dirLight);
     const sphereGeom = new THREE.SphereGeometry(SPHERE_RADIUS);
-    const sphereMat = new THREE.MeshStandardMaterial({ color: "hotpink" });
+    const sphereMat = new THREE.MeshStandardMaterial({ color: 0x440e4d });
     const sphere = new THREE.Mesh(sphereGeom, sphereMat);
     sphere.position.y += SPHERE_RADIUS;
     const floorGeom = new THREE.PlaneGeometry(FLOOR_WIDTH, FLOOR_DEPTH);
-    const floorMat = new THREE.MeshStandardMaterial({ color: "lightblue" });
+    const floorMat = new THREE.MeshLambertMaterial({ color: 0x2746cf });
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2;
     this.scene.add(sphere);
