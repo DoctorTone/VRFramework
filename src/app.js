@@ -14,31 +14,7 @@ import { SCENE } from "./config/Config.js";
 import { VRButton } from "./webXR/VRButton.js";
 import { XRControllerModelFactory } from "./webXR/XRControllerModelFactory.js";
 
-const DEFAULT_SCALE = 4.0;
-const DEFAULT_POSITION = {
-  x: 0,
-  y: 10,
-  z: -10,
-};
-const DEFAULT_ROTATION = {
-  x: -1,
-  y: -0.5,
-  z: 0,
-};
-
-const UP_VECTOR = new THREE.Vector3(0, 1, 0);
-const FACING_DIRECTION = new THREE.Vector3(0, -0.25, -1);
-const LUNAR_SCALE = (Math.PI * 2) / 29.5;
-
-const MOON_SCALE = 1;
-const BLOOM_SCENE = 1;
-const SPHERE_RADIUS = 10;
-const FLOOR_WIDTH = 1000;
-const FLOOR_DEPTH = 1000;
-const WIDTH_SEGMENTS = 32;
-const HEIGHT_SEGMENTS = 32;
-
-class Moon {
+class VRFramework {
   renderer;
   container;
   camera;
@@ -53,7 +29,6 @@ class Moon {
   // Controllers
   controllers = [];
   controllerGrips = [];
-  finalPass;
   textureLoader;
   // Movement
   moveForward = false;
@@ -62,7 +37,7 @@ class Moon {
   moveRight = false;
   velocity = new THREE.Vector3();
   direction = new THREE.Vector3();
-  settingsName = "moonSettings";
+  settingsName = "VRSettings";
   generalSettings = {
     "Save Settings": () => {
       const sceneSettings = JSON.stringify(this.getSceneSettings());
@@ -77,52 +52,10 @@ class Moon {
       }
     },
   };
-  moonSettings = {
-    Controls: false,
-    Mode: "translate",
-    PosX: 0,
-    PosY: 0,
-    PosZ: 0,
-    RotX: radsToDegrees(DEFAULT_ROTATION.x),
-    RotY: radsToDegrees(DEFAULT_ROTATION.y),
-    RotZ: radsToDegrees(DEFAULT_ROTATION.z),
-    ScaleX: 1,
-    ScaleY: 1,
-    ScaleZ: 1,
-  };
   ambientLightSettings = {
     Enabled: false,
     Color: "0xffffff",
     Intensity: 1,
-  };
-  modelSettings = {
-    LightsInModel: false,
-  };
-  waterSettings = {
-    Color: "0x000000",
-    Time: this.waterTime,
-    PosY: 0,
-    PosZ: 0,
-    ScaleX: 1,
-    ScaleZ: 1,
-    ReflectanceScale: 1.0,
-  };
-  bloomSettings = {
-    Enabled: false,
-    exposure: 1,
-    Strength: 1.76,
-    Threshold: 0.05,
-    Radius: 2.36,
-  };
-  billboardSettings = {
-    Scale: MOON_SCALE,
-    Opacity: 0.5,
-  };
-  sunRotation = 0;
-  sunSettings = {
-    Rotation: 0,
-    Color: 0xffffff,
-    Intensity: 0.5,
   };
 
   constructor() {}
@@ -132,7 +65,6 @@ class Moon {
     this.dracoLoader.setDecoderPath("./libs/draco/");
     this.GLTFLoader = new GLTFLoader();
     this.GLTFLoader.setDRACOLoader(this.dracoLoader);
-    this.darkMaterial = new THREE.MeshBasicMaterial({ color: "black" });
     this.materials = {};
     this.textureLoader = new THREE.TextureLoader();
     this.clock = new THREE.Clock();
@@ -286,21 +218,23 @@ class Moon {
     this.scene = new THREE.Scene();
     this.scene.add(this.ambientLight);
     this.scene.add(this.pointLight);
-    // this.scene.add(this.dirLight);
-    const sphereGeom = new THREE.SphereGeometry(SPHERE_RADIUS);
-    const sphereMat = new THREE.MeshStandardMaterial({ color: 0x440e4d });
-    const sphere = new THREE.Mesh(sphereGeom, sphereMat);
-    sphere.position.y += SPHERE_RADIUS;
-    const floorGeom = new THREE.PlaneGeometry(FLOOR_WIDTH, FLOOR_DEPTH);
+    const floorGeom = new THREE.PlaneGeometry(
+      SCENE.FLOOR_WIDTH,
+      SCENE.FLOOR_DEPTH
+    );
     const floorMat = new THREE.MeshLambertMaterial({ color: 0x2746cf });
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.1;
-    // this.scene.add(sphere);
     this.scene.add(floor);
     this.scene.add(this.pointerControls.getObject());
     // Grid
-    const grid = new THREE.GridHelper(1000, 100, 0x000000, 0x000000);
+    const grid = new THREE.GridHelper(
+      SCENE.FLOOR_WIDTH,
+      SCENE.FLOOR_WIDTH / 10,
+      0x000000,
+      0x000000
+    );
     grid.material.opacity = 0.5;
     grid.material.transparent = true;
     this.scene.add(grid);
@@ -308,11 +242,6 @@ class Moon {
 
   createGUI = () => {
     this.gui = new GUI();
-    this.gui.add(this.modelSettings, "LightsInModel").onChange((enabled) => {
-      this.modelLights.forEach((light) => {
-        light.visible = enabled;
-      });
-    });
 
     const ambientLightFolder = this.gui.addFolder("Ambient Light");
     ambientLightFolder.open(false);
@@ -337,99 +266,17 @@ class Moon {
   };
 
   getSceneSettings = () => {
-    const sceneSettings = {
-      water: {
-        distortionScale:
-          this.waterShader.material.uniforms.distortionScale.value,
-        size: this.waterShader.material.uniforms.size.value,
-        Color: this.waterColour.getValue(),
-        Time: this.waterAnimationTime.getValue(),
-        PosY: this.waterPosY.getValue(),
-        PosZ: this.waterPosZ.getValue(),
-        ScaleX: this.waterScaleX.getValue(),
-        ScaleZ: this.waterScaleZ.getValue(),
-      },
-      moon: {
-        PosX: this.moonPosX.getValue(),
-        PosY: this.moonPosY.getValue(),
-        PosZ: this.moonPosZ.getValue(),
-        RotX: this.moonRotX.getValue(),
-        RotY: this.moonRotY.getValue(),
-        RotZ: this.moonRotZ.getValue(),
-        ScaleX: this.moonScaleX.getValue(),
-        ScaleY: this.moonScaleY.getValue(),
-        ScaleZ: this.moonScaleZ.getValue(),
-      },
-      billboard: {
-        Scale: this.billboardScale.getValue(),
-        Opacity: this.billboardOpacity.getValue(),
-      },
-    };
+    const sceneSettings = {};
 
     return sceneSettings;
   };
 
   loadSettings = () => {
     // See if any saved settings
-    const savedSettings = localStorage.getItem("moonSettings");
+    const savedSettings = localStorage.getItem("VRSettings");
     if (savedSettings === null) return;
 
-    const settings = JSON.parse(localStorage.getItem("moonSettings"));
-    // Update water
-    const waterSettings = settings.water;
-    this.waterShader.material.uniforms.distortionScale.value =
-      waterSettings.distortionScale;
-    this.distortScale.setValue(waterSettings.distortionScale);
-    this.waterShader.material.uniforms.size.value = waterSettings.size;
-    this.waterSize.setValue(waterSettings.size);
-    this.waterColour.setValue(waterSettings.Color);
-    this.waterAnimationTime.setValue(waterSettings.Time);
-    this.waterPosY.setValue(waterSettings.PosY);
-    this.waterShader.position.y = waterSettings.PosY;
-    this.waterPosZ.setValue(waterSettings.PosZ);
-    this.waterShader.position.z = waterSettings.PosZ;
-    this.waterScaleX.setValue(waterSettings.ScaleX);
-    this.waterShader.scale.x = waterSettings.ScaleX;
-    this.waterScaleZ.setValue(waterSettings.ScaleZ);
-    this.waterShader.scale.y = waterSettings.ScaleZ;
-
-    // Update moon
-    const moonSettings = settings.moon;
-    this.moonPosX.setValue(moonSettings.PosX);
-    this.moonPosY.setValue(moonSettings.PosY);
-    this.moonPosZ.setValue(moonSettings.PosZ);
-    this.moon.position.set(
-      moonSettings.PosX,
-      moonSettings.PosY,
-      moonSettings.PosZ
-    );
-    this.moonRotX.setValue(moonSettings.RotX);
-    this.moonRotY.setValue(moonSettings.RotY);
-    this.moonRotZ.setValue(moonSettings.RotZ);
-    this.moon.rotation.set(
-      degreesToRads(moonSettings.RotX),
-      degreesToRads(moonSettings.RotY),
-      degreesToRads(moonSettings.RotZ)
-    );
-    this.moonScaleX.setValue(moonSettings.ScaleX);
-    this.moonScaleY.setValue(moonSettings.ScaleY);
-    this.moonScaleZ.setValue(moonSettings.ScaleZ);
-    this.moon.scale.set(
-      moonSettings.ScaleX,
-      moonSettings.ScaleY,
-      moonSettings.ScaleZ
-    );
-
-    // Update billboard
-    const billboardSettings = settings.billboard;
-    this.billboardScale.setValue(billboardSettings.Scale);
-    this.moonSprite.scale.set(
-      billboardSettings.Scale,
-      billboardSettings.Scale,
-      billboardSettings.Scale
-    );
-    this.billboardOpacity.setValue(billboardSettings.Opacity);
-    this.bloomMaterial.opacity = billboardSettings.Opacity;
+    const settings = JSON.parse(localStorage.getItem("VRSettings"));
   };
 
   loadModels = () => {
@@ -516,9 +363,9 @@ function buildController(data) {
 }
 
 window.addEventListener("load", () => {
-  const moon = new Moon();
-  moon.init();
-  moon.run();
+  const vrApp = new VRFramework();
+  vrApp.init();
+  vrApp.run();
 });
 
 const RAD_DEG = 180 / Math.PI;
