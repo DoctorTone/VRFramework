@@ -53,9 +53,9 @@ class VRFramework {
     },
   };
   ambientLightSettings = {
-    Enabled: false,
+    Enabled: true,
     Color: "0xffffff",
-    Intensity: 1,
+    Intensity: SCENE.ambientIntensity,
   };
 
   constructor() {}
@@ -86,7 +86,7 @@ class VRFramework {
 
   createRenderer = () => {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setClearColor(new THREE.Color(0x777777));
+    this.renderer.setClearColor(new THREE.Color(SCENE.skyColour));
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -146,7 +146,7 @@ class VRFramework {
   createLights = () => {
     // Ambient
     const color = 0xffffff;
-    const intensity = 1.0;
+    const intensity = SCENE.ambientIntensity;
     this.ambientLight = new THREE.AmbientLight(color, intensity);
     this.pointLight = new THREE.PointLight(color, 1);
     this.pointLight.position.set(30, 30, 0);
@@ -222,7 +222,9 @@ class VRFramework {
       SCENE.FLOOR_WIDTH,
       SCENE.FLOOR_DEPTH
     );
-    const floorMat = new THREE.MeshLambertMaterial({ color: 0x2746cf });
+    const floorMat = new THREE.MeshLambertMaterial({
+      color: SCENE.floorColour,
+    });
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.1;
