@@ -57,6 +57,12 @@ class VRFramework {
     Color: "0xffffff",
     Intensity: SCENE.ambientIntensity,
   };
+  skySettings = {
+    "Sky Color": SCENE.skyColour,
+  };
+  floorSettings = {
+    "Floor Color": SCENE.floorColour,
+  };
 
   constructor() {}
 
@@ -225,6 +231,7 @@ class VRFramework {
     const floorMat = new THREE.MeshLambertMaterial({
       color: SCENE.floorColour,
     });
+    this.floorMat = floorMat;
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.1;
@@ -261,6 +268,18 @@ class VRFramework {
       .add(this.ambientLightSettings, "Intensity", 0, 3)
       .onChange((value) => {
         this.ambientLight.intensity = value;
+      });
+
+    this.skyColour = this.gui
+      .addColor(this.skySettings, "Sky Color")
+      .onFinishChange((value) => {
+        this.renderer.setClearColor(value);
+      });
+
+    this.floorColour = this.gui
+      .addColor(this.floorSettings, "Floor Color")
+      .onFinishChange((value) => {
+        this.floorMat.color = new THREE.Color(value);
       });
 
     this.gui.add(this.generalSettings, "Save Settings");
