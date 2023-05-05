@@ -48,7 +48,7 @@ select {
   z-index: 2 !important; /* TODO Solve this in HTML */
 }
 
-@media all and (max-width: 640px) {
+/* @media all and (max-width: 640px) {
   .lil-gui.root {
     right: auto;
     top: auto;
@@ -57,6 +57,9 @@ select {
     bottom: 0;
     left: 0;
   }
+} */
+.lil-gui.root {
+  right: 0%;
 }
 
 #overlay {
