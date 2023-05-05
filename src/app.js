@@ -42,7 +42,7 @@ class VRFramework {
     "Save Settings": () => {
       const sceneSettings = JSON.stringify(this.gui.save());
       // DEBUG
-      console.log("Settings = ", sceneSettings);
+      // console.log("Settings = ", sceneSettings);s
       localStorage.setItem(this.settingsName, sceneSettings);
       alert(`Settings saved`);
     },
@@ -142,10 +142,10 @@ class VRFramework {
 
   createCamera = () => {
     this.camera = new THREE.PerspectiveCamera(
-      45,
+      SCENE.FOV,
       window.innerWidth / window.innerHeight,
-      0.01,
-      1000
+      SCENE.nearPlane,
+      SCENE.farPlane
     );
     this.camera.position.copy(SCENE.cameraPosition);
   };
