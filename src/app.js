@@ -40,7 +40,7 @@ class VRFramework {
   settingsName = "VRSettings";
   generalSettings = {
     "Save Settings": () => {
-      const sceneSettings = JSON.stringify(this.getSceneSettings());
+      const sceneSettings = JSON.stringify(this.gui.save());
       // DEBUG
       console.log("Settings = ", sceneSettings);
       localStorage.setItem(this.settingsName, sceneSettings);
@@ -81,6 +81,7 @@ class VRFramework {
     this.createControls();
     this.createScene();
     this.createGUI();
+    this.loadSettings();
     this.loadModels();
     this.setupVR();
 
@@ -296,18 +297,13 @@ class VRFramework {
     this.gui.add(this.generalSettings, "Clear Settings");
   };
 
-  getSceneSettings = () => {
-    const sceneSettings = {};
-
-    return sceneSettings;
-  };
-
   loadSettings = () => {
     // See if any saved settings
     const savedSettings = localStorage.getItem("VRSettings");
     if (savedSettings === null) return;
 
     const settings = JSON.parse(localStorage.getItem("VRSettings"));
+    this.gui.load(settings);
   };
 
   loadModels = () => {
