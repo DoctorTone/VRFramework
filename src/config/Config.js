@@ -5,8 +5,8 @@ const SCENE = {
   ambientIntensity: 0.25,
   FLOOR_WIDTH: 500,
   FLOOR_DEPTH: 500,
-  floorColour: 0x2746cf,
-  skyColour: 0x777777,
+  floorColour: 0x484d60,
+  skyColour: 0x6165db,
 };
 
 export { SCENE };

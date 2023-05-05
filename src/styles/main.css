@@ -95,7 +95,16 @@ select {
 
 .panel {
   position: absolute;
-  width: 100%;
-  left: 0%;
-  bottom: 5%;
+}
+.textOrange {
+  color: orange;
+}
+.outline {
+  border: 2px solid orange;
+  border-radius: 10px;
+}
+#instructions {
+  width: 30%;
+  top: 30%;
+  left: 35%;
 }
