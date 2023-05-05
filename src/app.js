@@ -156,7 +156,7 @@ class VRFramework {
     const intensity = SCENE.ambientIntensity;
     this.ambientLight = new THREE.AmbientLight(color, intensity);
     this.pointLight = new THREE.PointLight(color, 1);
-    this.pointLight.position.set(30, 30, 0);
+    this.pointLight.position.copy(SCENE.pointLightPosition);
     // this.dirLight = new THREE.DirectionalLight(color, 1);
     // this.dirLight.position.set(1, 1, 0);
   };
