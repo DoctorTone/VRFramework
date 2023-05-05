@@ -95,12 +95,13 @@ select {
 
 .panel {
   position: absolute;
+  background-color: rgba(0.4, 0.4, 0.4, 0.35);
 }
 .textOrange {
   color: orange;
 }
 .outline {
-  border: 2px solid orange;
+  border: 3px solid orange;
   border-radius: 10px;
 }
 #instructions {

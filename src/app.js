@@ -170,6 +170,16 @@ class VRFramework {
     });
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
+
+    this.pointerControls.addEventListener("lock", () => {
+      const elem = document.getElementById("instructions");
+      elem.classList.add("d-none");
+    });
+
+    this.pointerControls.addEventListener("unlock", () => {
+      const elem = document.getElementById("instructions");
+      elem.classList.remove("d-none");
+    });
   };
 
   onKeyDown = (event) => {
