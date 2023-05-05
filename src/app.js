@@ -9,6 +9,7 @@ import { PointerLockControls } from "./controls/PointerLockControls";
 import { DRACOLoader } from "./loaders/DRACOLoader.js";
 import { GLTFLoader } from "./loaders/GLTFLoader.js";
 import { SCENE } from "./config/Config.js";
+import { getModelCentre, getModelSize } from "./utils/Utils.js";
 
 // WebXR
 import { VRButton } from "./webXR/VRButton.js";
@@ -37,6 +38,10 @@ class VRFramework {
   moveRight = false;
   velocity = new THREE.Vector3();
   direction = new THREE.Vector3();
+  worldDir = new THREE.Vector3();
+  proximity = SCENE.PROXIMITY;
+  collided = false;
+  collisionPoint = new THREE.Vector3();
   settingsName = "VRSettings";
   generalSettings = {
     "Save Settings": () => {
@@ -80,6 +85,7 @@ class VRFramework {
     this.createLights();
     this.createControls();
     this.createScene();
+    this.createCollisionSystem();
     this.createGUI();
     this.loadSettings();
     this.loadModels();
@@ -142,10 +148,10 @@ class VRFramework {
 
   createCamera = () => {
     this.camera = new THREE.PerspectiveCamera(
-      SCENE.FOV,
+      SCENE.CAM_FOV,
       window.innerWidth / window.innerHeight,
-      SCENE.nearPlane,
-      SCENE.farPlane
+      SCENE.CAM_NEAR_PLANE,
+      SCENE.CAM_FAR_PLANE
     );
     this.camera.position.copy(SCENE.cameraPosition);
   };
@@ -260,6 +266,58 @@ class VRFramework {
     this.scene.add(grid);
   };
 
+  createCollisionSystem = () => {
+    this.currentDirection = new THREE.Vector3().copy(SCENE.FORWARD_VECTOR);
+    this.raycastOrigin = new THREE.Vector3();
+    this.raycaster = new THREE.Raycaster(
+      this.raycastOrigin,
+      this.currentDirection,
+      SCENE.NEAR_RAYCAST,
+      SCENE.FAR_RAYCAST
+    );
+    this.raycaster.camera = this.camera;
+  };
+
+  checkForCollisions = () => {
+    // Take user rotation into account
+    if (this.pointerControls) {
+      if (this.direction.length() < 0.1) return SCENE.COLLIDED_NONE;
+      this.userRotation = this.camera.rotation.y;
+      this.camera.getWorldDirection(this.worldDir);
+      if (this.worldDir.z > 0) {
+        this.userRotation = Math.PI - this.userRotation;
+      }
+      this.direction.applyAxisAngle(SCENE.UP_VECTOR, this.userRotation);
+    }
+
+    this.raycastOrigin.copy(this.camera.position);
+    this.raycaster.set(this.raycastOrigin, this.direction);
+    this.intersections = this.raycaster.intersectObjects(
+      this.scene.children,
+      true
+    );
+
+    if (this.intersections.length) {
+      // DEBUG
+      console.log("Hit something...");
+
+      let hit = this.intersections[0];
+      let collisionState = SCENE.COLLIDED_NONE;
+      if (hit.object.type === "Mesh") {
+        collisionState = SCENE.COLLIDED_MESH;
+        if (hit.distance < this.proximity) {
+          // DEBUG
+          // console.log("Hit point = ", hit);
+
+          this.currentHit = hit;
+          return collisionState;
+        }
+      }
+    }
+
+    return SCENE.COLLIDED_NONE;
+  };
+
   createGUI = () => {
     this.gui = new GUI();
 
@@ -313,6 +371,17 @@ class VRFramework {
       model.scale.set(scale, scale, scale);
       model.position.y = 10;
       this.scene.add(model);
+      // Create bounding box for this model
+      const centre = getModelCentre(model);
+      const size = getModelSize(model);
+      // Height should be 2x distance from centre to floor
+      size.y = centre.y * 2;
+      const boxMat = new THREE.MeshBasicMaterial({ color: "red" });
+      const boxGeom = new THREE.BoxBufferGeometry(size.x, size.y, size.z);
+      const box = new THREE.Mesh(boxGeom, boxMat);
+      box.name = "BoundingBox";
+      box.position.copy(centre);
+      this.scene.add(box);
     });
   };
 
@@ -334,8 +403,6 @@ class VRFramework {
       this.velocity.x -= this.velocity.x * 10.0 * delta;
       this.velocity.z -= this.velocity.z * 10.0 * delta;
 
-      // this.velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
-
       this.direction.z = Number(this.moveForward) - Number(this.moveBackward);
       this.direction.x = Number(this.moveRight) - Number(this.moveLeft);
       this.direction.normalize(); // this ensures consistent movements in all directions
@@ -348,7 +415,38 @@ class VRFramework {
       this.pointerControls.moveRight(-this.velocity.x * delta);
       this.pointerControls.moveForward(-this.velocity.z * delta);
 
-      // this.pointerControls.getObject().position.y += this.velocity.y * delta; // new behavior
+      // Collision detection
+      const collisionState = this.checkForCollisions();
+      switch (collisionState) {
+        case SCENE.COLLIDED_MESH:
+          if (this.collided) {
+            this.camera.position.copy(this.collisionPoint);
+            break;
+          }
+
+          this.collided = true;
+          // Move back to fixed distance from object
+          // DEBUG
+          // console.log("Direction = ", this.direction);
+
+          this.direction.multiplyScalar(this.proximity);
+          // DEBUG
+          // console.log("Adjusted = ", this.direction);
+
+          this.currentHit.point.sub(this.direction);
+          this.collisionPoint.copy(this.currentHit.point);
+          // DEBUG
+          // console.log("Collision point = ", this.collisionPoint);
+          break;
+
+        case SCENE.COLLIDED_NONE:
+          this.collided = false;
+          this.proximity = SCENE.PROXIMITY;
+          break;
+
+        default:
+          break;
+      }
     }
 
     this.renderer.render(this.scene, this.camera);
