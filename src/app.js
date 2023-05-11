@@ -39,6 +39,7 @@ class VRFramework {
   velocity = new THREE.Vector3();
   direction = new THREE.Vector3();
   worldDir = new THREE.Vector3();
+  tempVec = new THREE.Vector3();
   proximity = SCENE.PROXIMITY;
   collided = false;
   collisionPoint = new THREE.Vector3();
@@ -307,7 +308,7 @@ class VRFramework {
         collisionState = SCENE.COLLIDED_MESH;
         if (hit.distance < this.proximity) {
           // DEBUG
-          // console.log("Hit point = ", hit);
+          console.log("Hit point = ", hit);
 
           this.currentHit = hit;
           return collisionState;
@@ -370,7 +371,7 @@ class VRFramework {
       const model = gltf.scene;
       model.scale.set(scale, scale, scale);
       model.position.y = 10;
-      this.scene.add(model);
+      // this.scene.add(model);
       // Create bounding box for this model
       const centre = getModelCentre(model);
       const size = getModelSize(model);
@@ -414,6 +415,10 @@ class VRFramework {
 
       this.pointerControls.moveRight(-this.velocity.x * delta);
       this.pointerControls.moveForward(-this.velocity.z * delta);
+
+      this.direction.z *= -1;
+      // DEBUG
+      // console.log("Direction = ", this.direction);
 
       // Collision detection
       const collisionState = this.checkForCollisions();

@@ -13,7 +13,7 @@ const SCENE = {
   FLOOR_DEPTH: 500,
   floorColour: 0x484d60,
   skyColour: 0x6165db,
-  PROXIMITY: 0.3,
+  PROXIMITY: 0.75,
   NEAR_RAYCAST: 0,
   FAR_RAYCAST: 2,
   COLLIDED_NONE: 0,
