@@ -37,6 +37,7 @@ class VRFramework {
   moveLeft = false;
   moveRight = false;
   velocity = new THREE.Vector3();
+  movementSpeed = 400;
   direction = new THREE.Vector3();
   worldDir = new THREE.Vector3();
   tempVec = new THREE.Vector3();
@@ -300,7 +301,7 @@ class VRFramework {
 
     if (this.intersections.length) {
       // DEBUG
-      console.log("Hit something...");
+      // console.log("Hit something...");
 
       let hit = this.intersections[0];
       let collisionState = SCENE.COLLIDED_NONE;
@@ -308,7 +309,7 @@ class VRFramework {
         collisionState = SCENE.COLLIDED_MESH;
         if (hit.distance < this.proximity) {
           // DEBUG
-          console.log("Hit point = ", hit);
+          // console.log("Hit point = ", hit);
 
           this.currentHit = hit;
           return collisionState;
@@ -371,7 +372,7 @@ class VRFramework {
       const model = gltf.scene;
       model.scale.set(scale, scale, scale);
       model.position.y = 10;
-      // this.scene.add(model);
+      this.scene.add(model);
       // Create bounding box for this model
       const centre = getModelCentre(model);
       const size = getModelSize(model);
@@ -383,6 +384,7 @@ class VRFramework {
       box.name = "BoundingBox";
       box.position.copy(centre);
       this.scene.add(box);
+      box.visible = false;
     });
   };
 
@@ -404,14 +406,20 @@ class VRFramework {
       this.velocity.x -= this.velocity.x * 10.0 * delta;
       this.velocity.z -= this.velocity.z * 10.0 * delta;
 
+      this.movementSpeed = SCENE.MOVE_SPEED;
+      if (this.collided) {
+        this.movementSpeed = 0;
+        this.velocity.set(0, 0, 0);
+      }
+
       this.direction.z = Number(this.moveForward) - Number(this.moveBackward);
       this.direction.x = Number(this.moveRight) - Number(this.moveLeft);
       this.direction.normalize(); // this ensures consistent movements in all directions
 
       if (this.moveForward || this.moveBackward)
-        this.velocity.z -= this.direction.z * 400.0 * delta;
+        this.velocity.z -= this.direction.z * this.movementSpeed * delta;
       if (this.moveLeft || this.moveRight)
-        this.velocity.x -= this.direction.x * 400.0 * delta;
+        this.velocity.x -= this.direction.x * this.movementSpeed * delta;
 
       this.pointerControls.moveRight(-this.velocity.x * delta);
       this.pointerControls.moveForward(-this.velocity.z * delta);

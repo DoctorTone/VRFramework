@@ -13,11 +13,12 @@ const SCENE = {
   FLOOR_DEPTH: 500,
   floorColour: 0x484d60,
   skyColour: 0x6165db,
-  PROXIMITY: 0.75,
+  PROXIMITY: 1,
   NEAR_RAYCAST: 0,
   FAR_RAYCAST: 2,
   COLLIDED_NONE: 0,
   COLLIDED_MESH: 1,
+  MOVE_SPEED: 400,
 };
 
 export { SCENE };
