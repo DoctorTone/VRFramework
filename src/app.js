@@ -417,7 +417,7 @@ class VRFramework {
       const scale = 15;
       const model = gltf.scene;
       model.scale.set(scale, scale, scale);
-      model.position.y = 10;
+      model.position.y = 7.5;
       this.scene.add(model);
       // Create bounding box for this model
       const centre = getModelCentre(model);
