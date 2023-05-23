@@ -172,25 +172,27 @@ class VRFramework {
   };
 
   createControls = () => {
-    this.pointerControls = new PointerLockControls(
-      this.camera,
-      this.renderer.domElement
-    );
-    this.renderer.domElement.addEventListener("click", () => {
-      this.pointerControls.lock();
-    });
+    if (!this.isMobile) {
+      this.pointerControls = new PointerLockControls(
+        this.camera,
+        this.renderer.domElement
+      );
+      this.renderer.domElement.addEventListener("click", () => {
+        this.pointerControls.lock();
+      });
+      this.pointerControls.addEventListener("lock", () => {
+        const elem = document.getElementById("instructions");
+        elem.classList.add("d-none");
+      });
+
+      this.pointerControls.addEventListener("unlock", () => {
+        const elem = document.getElementById("instructions");
+        elem.classList.remove("d-none");
+      });
+    }
+
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
-
-    this.pointerControls.addEventListener("lock", () => {
-      const elem = document.getElementById("instructions");
-      elem.classList.add("d-none");
-    });
-
-    this.pointerControls.addEventListener("unlock", () => {
-      const elem = document.getElementById("instructions");
-      elem.classList.remove("d-none");
-    });
   };
 
   onKeyDown = (event) => {
@@ -423,7 +425,7 @@ class VRFramework {
   render = () => {
     // Movement
     const delta = this.clock.getDelta();
-    if (this.pointerControls.isLocked) {
+    if (this.pointerControls.isLocked || this.isMobile) {
       this.velocity.x -= this.velocity.x * 10.0 * delta;
       this.velocity.z -= this.velocity.z * 10.0 * delta;
 
@@ -442,8 +444,10 @@ class VRFramework {
       if (this.moveLeft || this.moveRight)
         this.velocity.x -= this.direction.x * this.movementSpeed * delta;
 
-      this.pointerControls.moveRight(-this.velocity.x * delta);
-      this.pointerControls.moveForward(-this.velocity.z * delta);
+      if (this.pointerControls) {
+        this.pointerControls.moveRight(-this.velocity.x * delta);
+        this.pointerControls.moveForward(-this.velocity.z * delta);
+      }
 
       this.direction.z *= -1;
       // DEBUG
