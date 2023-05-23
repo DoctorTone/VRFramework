@@ -22,6 +22,7 @@ class VRFramework {
   scene;
   stats;
   ambientLight;
+  isMobile;
   dracoLoader;
   GLTFLoader;
   orbitControls;
@@ -82,6 +83,7 @@ class VRFramework {
     this.textureLoader = new THREE.TextureLoader();
     this.clock = new THREE.Clock();
 
+    this.isMobile = this.getDeviceStatus();
     this.createRenderer();
     this.createCamera();
     this.createLights();
@@ -357,6 +359,23 @@ class VRFramework {
     this.gui.add(this.generalSettings, "Clear Settings");
 
     // Create GUI for mobile
+    if (this.isMobile) {
+      const elem = document.getElementById("moveControls");
+      if (elem) {
+        elem.classList.remove("d-none");
+      }
+    }
+  };
+
+  getDeviceStatus = () => {
+    // See if mobile
+    try {
+      document.createEvent("TouchEvent");
+      return true;
+    } catch (error) {
+      // Must be desktop
+      return false;
+    }
   };
 
   loadSettings = () => {
