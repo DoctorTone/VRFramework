@@ -277,6 +277,11 @@ class VRFramework {
     this.scene = new THREE.Scene();
     this.scene.add(this.ambientLight);
     this.scene.add(this.pointLight);
+
+    // Group for scene objects and group for VR controllers
+    const sceneContainer = new THREE.Group();
+    this.scene.add(sceneContainer);
+
     const floorGeom = new THREE.PlaneGeometry(
       SCENE.FLOOR_WIDTH,
       SCENE.FLOOR_DEPTH
@@ -288,8 +293,9 @@ class VRFramework {
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.1;
-    this.scene.add(floor);
-    this.pointerControls && this.scene.add(this.pointerControls.getObject());
+    sceneContainer.add(floor);
+    this.pointerControls &&
+      sceneContainer.add(this.pointerControls.getObject());
     // Grid
     const grid = new THREE.GridHelper(
       SCENE.FLOOR_WIDTH,
@@ -299,8 +305,9 @@ class VRFramework {
     );
     grid.material.opacity = 0.5;
     grid.material.transparent = true;
-    this.scene.add(grid);
+    sceneContainer.add(grid);
     this.grid = grid;
+    this.sceneContainer = sceneContainer;
   };
 
   createCollisionSystem = () => {
@@ -332,16 +339,22 @@ class VRFramework {
       if (this.direction.length() < 0.1) return SCENE.COLLIDED_NONE;
     }
 
-    this.raycastOrigin.copy(this.camera.position);
+    this.raycastOrigin.copy(
+      this.isImmersive ? this.vrContainer.position : this.camera.position
+    );
     this.raycaster.set(this.raycastOrigin, this.direction);
     this.intersections = this.raycaster.intersectObjects(
-      this.scene.children,
+      this.sceneContainer.children,
       true
     );
 
+    // DEBUG
+    // console.log("Dir = ", this.direction);
+    // console.log("VR cam = ", this.vrContainer.position);
+
     if (this.intersections.length) {
       // DEBUG
-      // console.log("Hit something...");
+      console.log("Hit something...");
 
       let hit = this.intersections[0];
       let collisionState = SCENE.COLLIDED_NONE;
@@ -431,7 +444,7 @@ class VRFramework {
       const model = gltf.scene;
       model.scale.set(scale, scale, scale);
       model.position.y = 7.5;
-      this.scene.add(model);
+      this.sceneContainer.add(model);
       // Create bounding box for this model
       const centre = getModelCentre(model);
       const size = getModelSize(model);
@@ -442,7 +455,7 @@ class VRFramework {
       const box = new THREE.Mesh(boxGeom, boxMat);
       box.name = "BoundingBox";
       box.position.copy(centre);
-      this.scene.add(box);
+      this.sceneContainer.add(box);
       box.visible = false;
     });
   };
@@ -494,39 +507,39 @@ class VRFramework {
       this.direction.z *= -1;
       // DEBUG
       // console.log("Direction = ", this.direction);
+    }
 
-      // Collision detection
-      const collisionState = this.checkForCollisions();
-      switch (collisionState) {
-        case SCENE.COLLIDED_MESH:
-          if (this.collided) {
-            this.camera.position.copy(this.collisionPoint);
-            break;
-          }
-
-          this.collided = true;
-          // Move back to fixed distance from object
-          // DEBUG
-          // console.log("Direction = ", this.direction);
-
-          this.direction.multiplyScalar(this.proximity);
-          // DEBUG
-          // console.log("Adjusted = ", this.direction);
-
-          this.currentHit.point.sub(this.direction);
-          this.collisionPoint.copy(this.currentHit.point);
-          // DEBUG
-          // console.log("Collision point = ", this.collisionPoint);
+    // Collision detection
+    const collisionState = this.checkForCollisions();
+    switch (collisionState) {
+      case SCENE.COLLIDED_MESH:
+        if (this.collided) {
+          this.camera.position.copy(this.collisionPoint);
           break;
+        }
 
-        case SCENE.COLLIDED_NONE:
-          this.collided = false;
-          this.proximity = SCENE.PROXIMITY;
-          break;
+        this.collided = true;
+        // Move back to fixed distance from object
+        // DEBUG
+        // console.log("Direction = ", this.direction);
 
-        default:
-          break;
-      }
+        this.direction.multiplyScalar(this.proximity);
+        // DEBUG
+        // console.log("Adjusted = ", this.direction);
+
+        this.currentHit.point.sub(this.direction);
+        this.collisionPoint.copy(this.currentHit.point);
+        // DEBUG
+        // console.log("Collision point = ", this.collisionPoint);
+        break;
+
+      case SCENE.COLLIDED_NONE:
+        this.collided = false;
+        this.proximity = SCENE.PROXIMITY;
+        break;
+
+      default:
+        break;
     }
 
     this.renderer.render(this.scene, this.camera);

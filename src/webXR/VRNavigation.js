@@ -3,6 +3,7 @@ import { SCENE, CONTROLLER } from "../config/Config.js";
 
 export class VRNavigation {
   updatePos = new THREE.Vector3();
+  currentDirection = new THREE.Vector3().copy(SCENE.FORWARD_VECTOR);
   movementSpeed = SCENE.VR_MOVEMENT_SPEED;
 
   constructor(renderer) {
@@ -47,11 +48,16 @@ export class VRNavigation {
           //   camRotation + userRotation.y,
           //   camera.rotation.z
           // );
+          this.currentDirection.copy(this.updatePos).normalize();
           this.updatePos.multiplyScalar(this.movementSpeed * deltaTime);
         }
       }
     }
 
     return this.updatePos;
+  };
+
+  getCurrentDirection = () => {
+    return this.currentDirection;
   };
 }
