@@ -48,16 +48,6 @@ select {
   z-index: 2 !important; /* TODO Solve this in HTML */
 }
 
-/* @media all and (max-width: 640px) {
-  .lil-gui.root {
-    right: auto;
-    top: auto;
-    max-height: 50%;
-    max-width: 80%;
-    bottom: 0;
-    left: 0;
-  }
-} */
 .lil-gui.root {
   right: 0%;
 }
@@ -88,6 +78,10 @@ select {
   cursor: pointer;
 }
 
+#moveControls {
+  bottom: 2%;
+  right: 2%;
+}
 #notSupported {
   width: 50%;
   margin: auto;
@@ -97,6 +91,9 @@ select {
 }
 
 .panel {
+  position: absolute;
+}
+.panelDark {
   position: absolute;
   background-color: rgba(0.4, 0.4, 0.4, 0.35);
 }

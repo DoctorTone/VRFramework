@@ -355,6 +355,8 @@ class VRFramework {
 
     this.gui.add(this.generalSettings, "Save Settings");
     this.gui.add(this.generalSettings, "Clear Settings");
+
+    // Create GUI for mobile
   };
 
   loadSettings = () => {
