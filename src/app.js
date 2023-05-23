@@ -100,7 +100,7 @@ class VRFramework {
     this.setupVR();
 
     this.stats = new Stats();
-    this.container.appendChild(this.stats.dom);
+    SCENE.STATS_ON && this.container.appendChild(this.stats.dom);
 
     window.addEventListener("resize", this.onWindowResize);
   };
@@ -397,7 +397,7 @@ class VRFramework {
 
   checkForCollisions = () => {
     // Take user rotation into account
-    if (this.pointerControls) {
+    if (this.pointerControls || this.isMobile) {
       if (this.direction.length() < 0.1) return SCENE.COLLIDED_NONE;
       this.userRotation = this.camera.rotation.y;
       this.camera.getWorldDirection(this.worldDir);
@@ -427,7 +427,7 @@ class VRFramework {
 
     if (this.intersections.length) {
       // DEBUG
-      console.log("Hit something...");
+      // console.log("Hit something...");
 
       let hit = this.intersections[0];
       let collisionState = SCENE.COLLIDED_NONE;
@@ -576,7 +576,8 @@ class VRFramework {
       if (this.moveForward || this.moveBackward)
         this.velocity.z -= this.direction.z * this.movementSpeed * delta;
       if (this.moveLeft || this.moveRight)
-        this.velocity.x -= this.direction.x * this.movementSpeed * delta;
+        this.velocity.x -=
+          ((this.direction.x * this.movementSpeed) / 2) * delta;
 
       if (this.pointerControls) {
         this.pointerControls.moveRight(-this.velocity.x * delta);

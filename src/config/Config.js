@@ -4,6 +4,7 @@ const SCENE = {
   CAM_FOV: 45,
   CAM_NEAR_PLANE: 0.01,
   CAM_FAR_PLANE: 300,
+  STATS_ON: false,
   cameraPosition: new THREE.Vector3(0, 15, 40),
   VR_POSITION: new THREE.Vector3(0, 5, 15),
   pointLightPosition: new THREE.Vector3(30, 30, 30),
