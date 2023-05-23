@@ -428,6 +428,9 @@ class VRFramework {
 
     // Create GUI for mobile
     if (this.isMobile) {
+      this.gui.close();
+      const instructions = document.getElementById("instructions");
+      instructions.classList.add("d-none");
       const elem = document.getElementById("moveControls");
       if (elem) {
         elem.classList.remove("d-none");
