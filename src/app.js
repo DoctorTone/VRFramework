@@ -94,6 +94,7 @@ class VRFramework {
     this.createGUI();
     this.loadSettings();
     this.loadModels();
+    this.setupVRContainer();
     this.setupVR();
 
     this.stats = new Stats();
@@ -129,7 +130,7 @@ class VRFramework {
     controller.addEventListener("selectend", this.onSelectEnd);
 
     this.controllers.push(controller);
-    this.scene.add(controller);
+    this.vrContainer.add(controller);
 
     const controller2 = this.renderer.xr.getController(1);
     controller2.addEventListener("connected", (event) => {
@@ -140,7 +141,7 @@ class VRFramework {
       this.isImmersive = true;
     });
     this.controllers.push(controller2);
-    this.scene.add(controller2);
+    this.vrContainer.add(controller2);
 
     const controllerModelFactory = new XRControllerModelFactory();
 
@@ -149,23 +150,27 @@ class VRFramework {
 
     controllerGrip.add(model);
     this.controllerGrips.push(controllerGrip);
-    this.scene.add(controllerGrip);
+    this.vrContainer.add(controllerGrip);
 
     const controllerGrip2 = this.renderer.xr.getControllerGrip(1);
     controllerGrip2.add(
       controllerModelFactory.createControllerModel(controllerGrip2)
     );
     this.controllerGrips.push(controllerGrip2);
-    this.scene.add(controllerGrip2);
+    this.vrContainer.add(controllerGrip2);
   };
 
-  setupVRCamera = () => {
+  setupVRContainer = () => {
     // Set up container to move vr camera around
     const vrGroup = new THREE.Group();
     vrGroup.name = "VRContainer";
-    vrGroup.add(this.camera);
     this.scene.add(vrGroup);
     vrGroup.position.copy(SCENE.VR_POSITION);
+    this.vrContainer = vrGroup;
+  };
+
+  setupVRCamera = () => {
+    this.vrContainer.add(this.camera);
   };
 
   createCamera = () => {
