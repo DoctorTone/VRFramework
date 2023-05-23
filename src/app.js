@@ -286,7 +286,23 @@ class VRFramework {
   onTouchStart = (event) => {
     switch (event.target.id) {
       case "forward":
+      case "imgforward":
         this.moveForward = true;
+        break;
+
+      case "back":
+      case "imgback":
+        this.moveBackward = true;
+        break;
+
+      case "right":
+      case "imgright":
+        this.moveRight = true;
+        break;
+
+      case "left":
+      case "imgleft":
+        this.moveLeft = true;
         break;
     }
   };
@@ -294,7 +310,23 @@ class VRFramework {
   onTouchEnd = (event) => {
     switch (event.target.id) {
       case "forward":
+      case "imgforward":
         this.moveForward = false;
+        break;
+
+      case "back":
+      case "imgback":
+        this.moveBackward = false;
+        break;
+
+      case "right":
+      case "imgright":
+        this.moveRight = false;
+        break;
+
+      case "left":
+      case "imgleft":
+        this.moveLeft = false;
         break;
     }
   };
@@ -552,8 +584,8 @@ class VRFramework {
       }
 
       if (this.isMobile) {
-        this.camera.x += -this.velocity.x * delta;
-        this.camera.z += -this.velocity.z * delta;
+        this.camera.position.x += -this.velocity.x * delta;
+        this.camera.position.z -= -this.velocity.z * delta;
       }
 
       this.direction.z *= -1;
