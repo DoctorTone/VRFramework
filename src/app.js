@@ -23,6 +23,7 @@ class VRFramework {
   stats;
   ambientLight;
   isMobile;
+  isImmersive = false;
   dracoLoader;
   GLTFLoader;
   orbitControls;
@@ -117,8 +118,12 @@ class VRFramework {
     document.body.appendChild(VRButton.createButton(this.renderer));
 
     const controller = this.renderer.xr.getController(0);
-    controller.addEventListener("connected", function (event) {
-      this.add(buildController(event.data));
+    controller.addEventListener("connected", (event) => {
+      // DEBUG
+      console.log("Connected...");
+      controller.add(buildController(event.data));
+      this.setupVRCamera();
+      this.isImmersive = true;
     });
     controller.addEventListener("selectstart", this.onSelectStart);
     controller.addEventListener("selectend", this.onSelectEnd);
@@ -127,8 +132,12 @@ class VRFramework {
     this.scene.add(controller);
 
     const controller2 = this.renderer.xr.getController(1);
-    controller2.addEventListener("connected", function (event) {
-      this.add(buildController(event.data));
+    controller2.addEventListener("connected", (event) => {
+      // DEBUG
+      console.log("Connected...");
+      controller2.add(buildController(event.data));
+      this.setupVRCamera();
+      this.isImmersive = true;
     });
     this.controllers.push(controller2);
     this.scene.add(controller2);
@@ -148,6 +157,15 @@ class VRFramework {
     );
     this.controllerGrips.push(controllerGrip2);
     this.scene.add(controllerGrip2);
+  };
+
+  setupVRCamera = () => {
+    // Set up container to move vr camera around
+    const vrGroup = new THREE.Group();
+    vrGroup.name = "VRContainer";
+    vrGroup.add(this.camera);
+    this.scene.add(vrGroup);
+    vrGroup.position.copy(SCENE.VR_POSITION);
   };
 
   createCamera = () => {
@@ -259,7 +277,7 @@ class VRFramework {
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.1;
     this.scene.add(floor);
-    this.scene.add(this.pointerControls.getObject());
+    this.pointerControls && this.scene.add(this.pointerControls.getObject());
     // Grid
     const grid = new THREE.GridHelper(
       SCENE.FLOOR_WIDTH,
@@ -425,7 +443,10 @@ class VRFramework {
   render = () => {
     // Movement
     const delta = this.clock.getDelta();
-    if (this.pointerControls.isLocked || this.isMobile) {
+    if (
+      (this.pointerControls && this.pointerControls.isLocked) ||
+      this.isMobile
+    ) {
       this.velocity.x -= this.velocity.x * 10.0 * delta;
       this.velocity.z -= this.velocity.z * 10.0 * delta;
 
