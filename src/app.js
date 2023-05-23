@@ -123,7 +123,7 @@ class VRFramework {
     const controller = this.renderer.xr.getController(0);
     controller.addEventListener("connected", (event) => {
       // DEBUG
-      console.log("Connected...");
+      // console.log("Connected...");
       controller.add(buildController(event.data));
       this.setupVRAttributes();
       this.isImmersive = true;
@@ -137,7 +137,7 @@ class VRFramework {
     const controller2 = this.renderer.xr.getController(1);
     controller2.addEventListener("connected", (event) => {
       // DEBUG
-      console.log("Connected...");
+      // console.log("Connected...");
       controller2.add(buildController(event.data));
       this.setupVRAttributes();
       this.isImmersive = true;
