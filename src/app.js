@@ -14,6 +14,7 @@ import { getModelCentre, getModelSize } from "./utils/Utils.js";
 // WebXR
 import { VRButton } from "./webXR/VRButton.js";
 import { XRControllerModelFactory } from "./webXR/XRControllerModelFactory.js";
+import { VRNavigation } from "./webXR/VRNavigation.js";
 
 class VRFramework {
   renderer;
@@ -24,6 +25,7 @@ class VRFramework {
   ambientLight;
   isMobile;
   isImmersive = false;
+  vrNavigation;
   dracoLoader;
   GLTFLoader;
   orbitControls;
@@ -123,7 +125,7 @@ class VRFramework {
       // DEBUG
       console.log("Connected...");
       controller.add(buildController(event.data));
-      this.setupVRCamera();
+      this.setupVRAttributes();
       this.isImmersive = true;
     });
     controller.addEventListener("selectstart", this.onSelectStart);
@@ -137,7 +139,7 @@ class VRFramework {
       // DEBUG
       console.log("Connected...");
       controller2.add(buildController(event.data));
-      this.setupVRCamera();
+      this.setupVRAttributes();
       this.isImmersive = true;
     });
     this.controllers.push(controller2);
@@ -169,8 +171,13 @@ class VRFramework {
     this.vrContainer = vrGroup;
   };
 
-  setupVRCamera = () => {
+  setupVRAttributes = () => {
+    if (this.isImmersive) return;
+
     this.vrContainer.add(this.camera);
+    this.scene.remove(this.grid);
+
+    this.vrNavigation = new VRNavigation(this.renderer);
   };
 
   createCamera = () => {
@@ -286,13 +293,14 @@ class VRFramework {
     // Grid
     const grid = new THREE.GridHelper(
       SCENE.FLOOR_WIDTH,
-      SCENE.FLOOR_WIDTH / 10,
+      SCENE.FLOOR_WIDTH / 20,
       0x000000,
       0x000000
     );
     grid.material.opacity = 0.5;
     grid.material.transparent = true;
     this.scene.add(grid);
+    this.grid = grid;
   };
 
   createCollisionSystem = () => {
@@ -317,6 +325,11 @@ class VRFramework {
         this.userRotation = Math.PI - this.userRotation;
       }
       this.direction.applyAxisAngle(SCENE.UP_VECTOR, this.userRotation);
+    }
+
+    if (this.isImmersive) {
+      this.direction = this.vrNavigation.getCurrentDirection();
+      if (this.direction.length() < 0.1) return SCENE.COLLIDED_NONE;
     }
 
     this.raycastOrigin.copy(this.camera.position);
@@ -448,10 +461,13 @@ class VRFramework {
   render = () => {
     // Movement
     const delta = this.clock.getDelta();
-    if (
-      (this.pointerControls && this.pointerControls.isLocked) ||
-      this.isMobile
-    ) {
+
+    if (this.vrNavigation) {
+      const userPos = this.vrNavigation.updateUserPosition(delta);
+      this.vrContainer.position.add(userPos);
+    }
+
+    if (this.pointerControls && this.pointerControls.isLocked) {
       this.velocity.x -= this.velocity.x * 10.0 * delta;
       this.velocity.z -= this.velocity.z * 10.0 * delta;
 

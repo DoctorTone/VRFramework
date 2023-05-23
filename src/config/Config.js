@@ -20,6 +20,12 @@ const SCENE = {
   COLLIDED_NONE: 0,
   COLLIDED_MESH: 1,
   MOVE_SPEED: 400,
+  VR_MOVEMENT_SPEED: 5,
 };
 
-export { SCENE };
+const CONTROLLER = {
+  X_AXIS: 2,
+  Z_AXIS: 3,
+};
+
+export { SCENE, CONTROLLER };
