@@ -175,7 +175,9 @@ class VRFramework {
     if (this.isImmersive) return;
 
     this.vrContainer.add(this.camera);
-    this.scene.remove(this.grid);
+    this.sceneContainer.remove(this.grid);
+    this.sceneContainer.add(this.plinth);
+    this.proximity = SCENE.VR_PROXIMITY;
 
     this.vrNavigation = new VRNavigation(this.renderer);
   };
@@ -282,6 +284,10 @@ class VRFramework {
     const sceneContainer = new THREE.Group();
     this.scene.add(sceneContainer);
 
+    this.pointerControls &&
+      sceneContainer.add(this.pointerControls.getObject());
+
+    // Main floor in scene
     const floorGeom = new THREE.PlaneGeometry(
       SCENE.FLOOR_WIDTH,
       SCENE.FLOOR_DEPTH
@@ -292,10 +298,21 @@ class VRFramework {
     this.floorMat = floorMat;
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.1;
+    floor.position.y = -0.25;
     sceneContainer.add(floor);
-    this.pointerControls &&
-      sceneContainer.add(this.pointerControls.getObject());
+
+    // Plinth in VR
+    const plinthGeom = new THREE.BoxGeometry(
+      SCENE.FLOOR_WIDTH / 20,
+      2,
+      SCENE.FLOOR_DEPTH / 20
+    );
+    const plinthMat = new THREE.MeshLambertMaterial({
+      color: SCENE.vrFloorColour,
+    });
+    const plinth = new THREE.Mesh(plinthGeom, plinthMat);
+    this.plinth = plinth;
+
     // Grid
     const grid = new THREE.GridHelper(
       SCENE.FLOOR_WIDTH,
@@ -514,7 +531,9 @@ class VRFramework {
     switch (collisionState) {
       case SCENE.COLLIDED_MESH:
         if (this.collided) {
-          this.camera.position.copy(this.collisionPoint);
+          this.isImmersive
+            ? this.vrContainer.position.copy(this.collisionPoint)
+            : this.camera.position.copy(this.collisionPoint);
           break;
         }
 
@@ -535,7 +554,9 @@ class VRFramework {
 
       case SCENE.COLLIDED_NONE:
         this.collided = false;
-        this.proximity = SCENE.PROXIMITY;
+        this.proximity = this.isImmersive
+          ? SCENE.VR_PROXIMITY
+          : SCENE.PROXIMITY;
         break;
 
       default:
