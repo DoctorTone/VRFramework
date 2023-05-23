@@ -225,6 +225,14 @@ class VRFramework {
 
     document.addEventListener("keydown", this.onKeyDown);
     document.addEventListener("keyup", this.onKeyUp);
+
+    // Mobile
+    document.addEventListener("touchstart", this.onTouchStart);
+    document.addEventListener("touchend", this.onTouchEnd);
+
+    document.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+    });
   };
 
   onKeyDown = (event) => {
@@ -271,6 +279,22 @@ class VRFramework {
       case "ArrowRight":
       case "KeyD":
         this.moveRight = false;
+        break;
+    }
+  };
+
+  onTouchStart = (event) => {
+    switch (event.target.id) {
+      case "forward":
+        this.moveForward = true;
+        break;
+    }
+  };
+
+  onTouchEnd = (event) => {
+    switch (event.target.id) {
+      case "forward":
+        this.moveForward = false;
         break;
     }
   };
@@ -500,7 +524,10 @@ class VRFramework {
       this.vrContainer.position.add(userPos);
     }
 
-    if (this.pointerControls && this.pointerControls.isLocked) {
+    if (
+      (this.pointerControls && this.pointerControls.isLocked) ||
+      this.isMobile
+    ) {
       this.velocity.x -= this.velocity.x * 10.0 * delta;
       this.velocity.z -= this.velocity.z * 10.0 * delta;
 
@@ -522,6 +549,11 @@ class VRFramework {
       if (this.pointerControls) {
         this.pointerControls.moveRight(-this.velocity.x * delta);
         this.pointerControls.moveForward(-this.velocity.z * delta);
+      }
+
+      if (this.isMobile) {
+        this.camera.x += -this.velocity.x * delta;
+        this.camera.z += -this.velocity.z * delta;
       }
 
       this.direction.z *= -1;
