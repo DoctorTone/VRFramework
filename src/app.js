@@ -483,14 +483,15 @@ class VRFramework {
     this.gui.add(this.generalSettings, "Clear Settings");
 
     // Create GUI for mobile
+    const instructions = document.getElementById("instructions");
     if (this.isMobile) {
       this.gui.close();
-      const instructions = document.getElementById("instructions");
-      instructions.classList.add("d-none");
       const elem = document.getElementById("moveControls");
       if (elem) {
         elem.classList.remove("d-none");
       }
+    } else {
+      instructions.classList.remove("d-none");
     }
   };
 
@@ -516,6 +517,11 @@ class VRFramework {
 
   loadModels = () => {
     this.GLTFLoader.load("models/gltf/lucy.gltf", (gltf) => {
+      // Remove loading indicator
+      const loader = document.getElementById("loading");
+      if (loader) {
+        loader.classList.add("d-none");
+      }
       const scale = 15;
       const model = gltf.scene;
       model.scale.set(scale, scale, scale);

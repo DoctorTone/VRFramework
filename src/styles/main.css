@@ -105,6 +105,10 @@ select {
   top: 30%;
   left: 35%;
 }
+#loading {
+  top: 48.5%;
+  left: 48.5%;
+}
 img {
   -webkit-user-select: none;
   -khtml-user-select: none;
