@@ -109,7 +109,6 @@ select {
   top: 48.5%;
   left: 48.5%;
 }
-html,
 img {
   -webkit-user-select: none;
   -webkit-user-drag: none;
