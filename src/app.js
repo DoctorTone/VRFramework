@@ -103,6 +103,10 @@ class VRFramework {
     SCENE.STATS_ON && this.container.appendChild(this.stats.dom);
 
     window.addEventListener("resize", this.onWindowResize);
+    // No context menus for controls
+    window.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+    });
   };
 
   createRenderer = () => {
